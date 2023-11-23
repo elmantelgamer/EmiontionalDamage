@@ -1,76 +1,51 @@
-predition1="";
-predition2="";
+var dog = 0;
+var cat = 0;
+var lion = 0;
+var cow = 0;
 
-Webcam.set({
-    width:350,
-    height:300,
-    image_format:'png',
-    png_quality:90
-});
-
-camera=document.getElementById("camera");
-Webcam.attach('#camera');
-
-function take_snapshot(){
-    Webcam.snap(function(data_uri){
-        document.getElementById("result").innerHTML='<img id="captured_image" src="'+data_uri+'"/>'
-    });
+function startClassification(){
+    navigator.mediaDevices.getUserMedia({audio:true});
+    classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/jak802zvl/model.json',modelReady);
 }
-
-console.log('ml5 version:',ml5.version);
-
-classifier=ml5.imageClassifier("https://teachablemachine.withgoogle.com/models/_mqXD5XL3/model.json",modelLoaded);
-function modelLoaded(){
-    console.log("modelisLoaded");
+function modelReady() {
+    classifier.classify(gotResults);
 }
-
-function check(){
-    img=document.getElementById('captured_image');
-    classifier.classify(img,gotResult);
-}
-
-
-function gotResult(error,results){
+function gotResults(error, results) {
     if(error){
-        console.log(error);
+        console.error(error);
     }
     else{
         console.log(results);
-        document.getElementById("result_emotion_name").innerHTML=results[0].label;
-        document.getElementById("result_emotion_name2").innerHTML=results[1].label;
-        prediction1=results[0].label;
-        prediction2=results[1].label;
-        speak();
-        if(results[0].label=="happy")
-        {
-            document.getElementById("update_emoji").innerHTML="&#128522;";
+        random_number_r = Math.floor(Math.random()*255) + 1;
+        random_number_g = Math.floor(Math.random()*255) + 1;
+        random_number_b = Math.floor(Math.random()*255) + 1;
+
+        document.getElementById("detected").innerHTML = "Detected Dog - "+dog+", Detected Cat - "+cat+", Detected lion - "+lion+", Detected Cow - "+cow;
+        document.getElementById("detected").style.color = "rgb("+random_number_r+","+random_number_g+","+random_number_b+")";
+
+        document.getElementById("animal_voices").innerHTML = "Detected Voice Is Of - " + results[0].label;
+        document.getElementById("animal_voices").style.color = "rgb("+random_number_r+","+random_number_g+","+random_number_b+")";
+
+        img = document.getElementById("animal_images");
+
+        if(results[0].label == "Barking"){
+           img.src = "https://shravaripatil.github.io/Sound_controlled_animals/bark.gif";
+           dog = dog + 1;
         }
-        if(results[0].label=="sad")
-        {
-            document.getElementById("update_emoji").innerHTML="&#128532;";
+        else if(results[0].label == "Meowing"){
+            img.src = "https://shravaripatil.github.io/Sound_controlled_animals/meow.gif";
+            cat = cat + 1;
         }
-        if(results[0].label=="angry")
-        {
-            document.getElementById("update_emoji").innerHTML="&#128545;";
+        else if(results[0].label == "Roar"){
+            img.src = "https://th.bing.com/th/id/R.ed424ce7e8aa8e8ea5909c5ec394be07?rik=Q5S23Xusd9rU%2bQ&riu=http%3a%2f%2fwww.clipartbest.com%2fcliparts%2fKTj%2fXXX%2fKTjXXX8gc.gif&ehk=KUdjPcBBkT%2fjY0VxirZWUyUob6J0qb5M73sJqKYFXbA%3d&risl=&pid=ImgRaw&r=0";
+            lion = lion + 1;
         }
-        if(results[1].label=="happy")
-        {
-            document.getElementById("update_emoji2").innerHTML="&#128522;";
+        else if(results[0].label == "Mooing"){
+            img.src = "https://th.bing.com/th/id/R.b4e11dc2b70207cb94f423386acf3f2c?rik=j%2fSbeyNl%2b8Nc2Q&riu=http%3a%2f%2fwww.clipartbest.com%2fcliparts%2f9iR%2f5qE%2f9iR5qEgpT.gif&ehk=ShP2z1%2fWaL85z9sRKB1qRZaNUWwnJc9ykc22f6jdMGc%3d&risl=&pid=ImgRaw&r=0";
+            cow = cow + 1;
         }
-        if(results[1].label=="sad")
-        {
-            document.getElementById("update_emoji2").innerHTML="&#128532;";
-        }
-        if(results[1].label=="angry")
-        {
-            document.getElementById("update_emoji2").innerHTML="&#128545;";
+        else{
+          img.src = "https://shravaripatil.github.io/Sound_controlled_animals/listen.gif";
         }
     }
 }
-function speak(){
-    var synth = window.speechSynthesis;
-    speakdata1 = "The first prediction is " + prediction1;
-    speakdata2 = "And the second prediction is " + prediction2;
-    var utterThis = new SpeechSynthesisUtterance(speakdata1 + speakdata2);
-    synth.speak(utterThis);
-    }
